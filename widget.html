@@ -1,0 +1,536 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+html, body {
+  width: 100vw;
+  height: 100vh;
+  background: #fff;
+  font-family: -apple-system, 'SF Pro Text', 'SF Pro Display', 'Helvetica Neue', sans-serif;
+  color: #000;
+  overflow: hidden;
+}
+
+body {
+  padding: 10px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+/* ── NAV BAR ── */
+#nav {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  flex-shrink: 0;
+  height: 30px;
+}
+
+.nav-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: #f0f0f0;
+  border-radius: 11px;
+  padding: 4px 10px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+  color: #000;
+  white-space: nowrap;
+  flex-shrink: 0;
+  height: 30px;
+}
+
+.nav-pill.active { background: #e0e0e0; }
+
+.nav-btn {
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f0f0f0;
+  border-radius: 9px;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 700;
+  color: #000;
+  text-decoration: none;
+  flex-shrink: 0;
+  border: none;
+  line-height: 1;
+}
+
+.nav-btn.active { background: #e0e0e0; }
+
+/* Spotify pill stretches to fill remaining space */
+#btn-spotify {
+  flex: 1;
+  min-width: 0;
+  justify-content: flex-start;
+  gap: 5px;
+}
+
+.sp-mini-text {
+  font-size: 11px;
+  font-weight: 400;
+  color: #666;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.nav-g { color: #4285F4; font-size: 15px; font-weight: 800; }
+
+/* ── PAGES ── */
+.page { display: none; flex: 1; flex-direction: column; gap: 6px; min-height: 0; }
+.page.show { display: flex; }
+
+/* ── HOME: WEEK CALENDAR ── */
+.week-box {
+  background: #f5f5f5;
+  border-radius: 13px;
+  padding: 7px 6px;
+  flex-shrink: 0;
+}
+
+.week-row {
+  display: flex;
+  justify-content: space-around;
+}
+
+.day-col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  flex: 1;
+}
+
+.day-ltr {
+  font-size: 10.5px;
+  font-weight: 500;
+  color: #999;
+  letter-spacing: 0.2px;
+}
+
+.day-num {
+  font-size: 15px;
+  font-weight: 500;
+  color: #1a1a1a;
+}
+
+.day-col.today .day-ltr { color: #111; font-weight: 700; }
+.day-col.today .day-num { font-weight: 800; }
+
+/* ── HOME: BOTTOM CARDS ── */
+.cards-row {
+  display: flex;
+  gap: 6px;
+  flex: 1;
+  min-height: 0;
+}
+
+.card {
+  flex: 1;
+  background: #f5f5f5;
+  border-radius: 13px;
+  padding: 8px 10px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  text-decoration: none;
+  color: #000;
+}
+
+.card-title {
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+.card-sub {
+  font-size: 11px;
+  color: #666;
+  margin-top: 2px;
+}
+
+.card-arrow { font-size: 14px; color: #bbb; align-self: flex-end; }
+
+.card-top-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.card-weather-icon { font-size: 22px; line-height: 1; }
+.card-hl { font-size: 11px; color: #666; }
+
+/* ── LIST PAGES (events & tasks) ── */
+.page-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-shrink: 0;
+}
+
+.page-title {
+  font-size: 10px;
+  font-weight: 700;
+  color: #999;
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+}
+
+.open-link {
+  font-size: 10.5px;
+  font-weight: 600;
+  text-decoration: none;
+  color: #666;
+}
+
+.list-scroll {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  overflow: hidden;
+}
+
+.list-item {
+  background: #f5f5f5;
+  border-radius: 11px;
+  padding: 6px 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  flex-shrink: 0;
+}
+
+.item-title {
+  font-size: 12px;
+  font-weight: 600;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.item-sub {
+  font-size: 10px;
+  color: #888;
+}
+
+.empty-msg {
+  font-size: 12px;
+  color: #bbb;
+  text-align: center;
+  padding-top: 8px;
+}
+
+/* task row with circle */
+.task-row { display: flex; align-items: center; gap: 8px; }
+.task-circle {
+  width: 13px; height: 13px;
+  border-radius: 50%;
+  border: 1.5px solid #ccc;
+  flex-shrink: 0;
+}
+
+/* ── SPOTIFY PAGE ── */
+.spotify-center {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+}
+
+.sp-note { font-size: 22px; }
+.sp-track { font-size: 13px; font-weight: 700; text-align: center; }
+.sp-artist { font-size: 11px; color: #777; text-align: center; }
+.sp-open-btn {
+  background: #1DB954;
+  color: #fff;
+  border-radius: 20px;
+  padding: 5px 18px;
+  font-size: 11px;
+  font-weight: 700;
+  text-decoration: none;
+  margin-top: 4px;
+  display: inline-block;
+}
+</style>
+</head>
+<body>
+
+<!-- ── NAV BAR ── -->
+<div id="nav">
+  <button class="nav-pill active" id="btn-home"   onclick="go('home')">Home 🏠</button>
+  <button class="nav-btn"         id="btn-events"  onclick="go('events')">📅</button>
+  <button class="nav-btn"         id="btn-tasks"   onclick="go('tasks')">✓</button>
+  <button class="nav-pill"        id="btn-spotify" onclick="go('spotify')">
+    <span>♪</span>
+    <span class="sp-mini-text" id="mini-track">---</span>
+  </button>
+  <a class="nav-btn nav-g" href="comgoogleapp://" title="Google">G</a>
+</div>
+
+<!-- ── HOME PAGE ── -->
+<div id="page-home" class="page show">
+  <div class="week-box">
+    <div class="week-row" id="wk-ltrs"></div>
+    <div class="week-row" id="wk-nums"></div>
+  </div>
+  <div class="cards-row">
+    <a class="card" href="calshow://">
+      <div>
+        <div class="card-title" id="display-date"></div>
+        <div class="card-sub"   id="display-events">0 événement aujourd'hui</div>
+      </div>
+      <div class="card-arrow">↗</div>
+    </a>
+    <div class="card">
+      <div class="card-top-row">
+        <div>
+          <div class="card-title" id="w-desc">---</div>
+          <div class="card-sub"   id="w-temp"></div>
+        </div>
+        <div class="card-weather-icon" id="w-icon">☁️</div>
+      </div>
+      <div class="card-hl" id="w-hl">H: --°  L: --°</div>
+    </div>
+  </div>
+</div>
+
+<!-- ── EVENTS PAGE ── -->
+<div id="page-events" class="page">
+  <div class="page-header">
+    <span class="page-title">Événements à venir</span>
+    <a class="open-link" href="calshow://">Calendrier ↗</a>
+  </div>
+  <div class="list-scroll" id="events-list">
+    <div class="empty-msg">Chargement…</div>
+  </div>
+</div>
+
+<!-- ── TASKS PAGE ── -->
+<div id="page-tasks" class="page">
+  <div class="page-header">
+    <span class="page-title">Tâches du jour</span>
+    <a class="open-link" href="ticktick://">TickTick ↗</a>
+  </div>
+  <div class="list-scroll" id="tasks-list">
+    <div class="empty-msg">Aucune tâche chargée</div>
+  </div>
+</div>
+
+<!-- ── SPOTIFY PAGE ── -->
+<div id="page-spotify" class="page">
+  <div class="spotify-center">
+    <span class="sp-note">♪</span>
+    <div class="sp-track"  id="sp-track">En lecture…</div>
+    <div class="sp-artist" id="sp-artist"></div>
+    <a class="sp-open-btn" href="spotify://">Ouvrir Spotify</a>
+  </div>
+</div>
+
+<script>
+// ── NAVIGATION ────────────────────────────────────────────────
+const PAGES = ['home', 'events', 'tasks', 'spotify'];
+const BTNS  = { home: 'btn-home', events: 'btn-events', tasks: 'btn-tasks', spotify: 'btn-spotify' };
+
+function go(page) {
+  PAGES.forEach(p => {
+    document.getElementById('page-' + p).classList.toggle('show', p === page);
+    const btn = document.getElementById(BTNS[p]);
+    if (btn) btn.classList.toggle('active', p === page);
+  });
+}
+
+// ── DATE HELPERS ─────────────────────────────────────────────
+const FR_MONTHS = ['janv','févr','mars','avr','mai','juin','juil','août','sept','oct','nov','déc'];
+// getDay(): 0=Sun,1=Mon,...,6=Sat
+const FR_DAYS   = ['D','L','M','M','J','V','S'];
+
+function fmtDate(d) {
+  return `${FR_MONTHS[d.getMonth()]}. ${d.getDate()}, ${d.getFullYear()}`;
+}
+
+// ── WEEK CALENDAR (7 days starting today) ─────────────────────
+(function buildWeek() {
+  const today = new Date();
+  const lRow = document.getElementById('wk-ltrs');
+  const nRow = document.getElementById('wk-nums');
+  for (let i = 0; i < 7; i++) {
+    const d = new Date(today);
+    d.setDate(today.getDate() + i);
+    const cls = i === 0 ? ' today' : '';
+    lRow.innerHTML += `<div class="day-col${cls}"><span class="day-ltr">${FR_DAYS[d.getDay()]}</span></div>`;
+    nRow.innerHTML += `<div class="day-col${cls}"><span class="day-num">${d.getDate()}</span></div>`;
+  }
+})();
+
+// Date card
+document.getElementById('display-date').textContent = fmtDate(new Date());
+
+// ── WEATHER — Open-Meteo (no API key required) ────────────────
+const WMO = {
+  0:  ['Ensoleillé','☀️'],
+  1:  ['Peu nuageux','🌤️'],
+  2:  ['Partiellement nuageux','⛅'],
+  3:  ['Nuageux','☁️'],
+  45: ['Brouillard','🌫️'],
+  48: ['Brouillard givrant','🌫️'],
+  51: ['Bruine légère','🌦️'],
+  53: ['Bruine','🌦️'],
+  55: ['Forte bruine','🌧️'],
+  61: ['Pluie légère','🌧️'],
+  63: ['Pluie','🌧️'],
+  65: ['Forte pluie','🌧️'],
+  71: ['Neige légère','🌨️'],
+  73: ['Neige','🌨️'],
+  75: ['Forte neige','❄️'],
+  77: ['Grésil','🌨️'],
+  80: ['Averses','🌦️'],
+  81: ['Averses modérées','🌧️'],
+  82: ['Fortes averses','⛈️'],
+  85: ['Averses neigeuses','🌨️'],
+  86: ['Fortes averses neigeuses','🌨️'],
+  95: ['Orage','⛈️'],
+  96: ['Orage + grêle','⛈️'],
+  99: ['Orage violent','⛈️'],
+};
+
+(async function loadWeather() {
+  try {
+    const pos = await new Promise((ok, err) =>
+      navigator.geolocation.getCurrentPosition(ok, err, { timeout: 6000 })
+    );
+    const { latitude: lat, longitude: lon } = pos.coords;
+    const url =
+      `https://api.open-meteo.com/v1/forecast` +
+      `?latitude=${lat}&longitude=${lon}` +
+      `&current=temperature_2m,weather_code` +
+      `&daily=temperature_2m_max,temperature_2m_min` +
+      `&timezone=auto&forecast_days=1`;
+    const data = await (await fetch(url)).json();
+
+    const code = data.current.weather_code;
+    const temp = Math.round(data.current.temperature_2m);
+    const hi   = Math.round(data.daily.temperature_2m_max[0]);
+    const lo   = Math.round(data.daily.temperature_2m_min[0]);
+    const [desc, icon] = WMO[code] ?? ['Nuageux', '☁️'];
+
+    document.getElementById('w-desc').textContent = `${desc}, ${temp}°`;
+    document.getElementById('w-icon').textContent = icon;
+    document.getElementById('w-hl').textContent   = `H: ${hi}°  L: ${lo}°`;
+  } catch {
+    document.getElementById('w-desc').textContent = 'Météo indisponible';
+    document.getElementById('w-icon').textContent = '🌡️';
+  }
+})();
+
+// ── CALENDAR EVENTS — Widgy JS bridge ────────────────────────
+(function loadCalendar() {
+  let events = [];
+  try {
+    events = window.widgetData?.calendarEvents
+          ?? window.calendarEvents
+          ?? [];
+  } catch {}
+
+  // Today's event count
+  const today = new Date(); today.setHours(0, 0, 0, 0);
+  const todayCount = events.filter(e => {
+    const d = new Date(e.startDate ?? e.date ?? e.start);
+    d.setHours(0, 0, 0, 0);
+    return +d === +today;
+  }).length;
+
+  document.getElementById('display-events').textContent =
+    todayCount === 1
+      ? '1 événement aujourd\'hui'
+      : `${todayCount} événement(s) aujourd\'hui`;
+
+  // Upcoming list
+  const upcoming = events
+    .filter(e => new Date(e.startDate ?? e.date ?? e.start) >= today)
+    .sort((a, b) =>
+      new Date(a.startDate ?? a.date ?? a.start) -
+      new Date(b.startDate ?? b.date ?? b.start)
+    )
+    .slice(0, 5);
+
+  const list = document.getElementById('events-list');
+  if (!upcoming.length) {
+    list.innerHTML = '<div class="empty-msg">Aucun événement à venir</div>';
+    return;
+  }
+  const timeFmt = new Intl.DateTimeFormat('fr-FR', {
+    weekday: 'short', day: 'numeric', month: 'short',
+    hour: '2-digit', minute: '2-digit'
+  });
+  list.innerHTML = upcoming.map(e => {
+    const d = new Date(e.startDate ?? e.date ?? e.start);
+    return `<div class="list-item">
+      <div class="item-title">${e.title ?? e.name ?? 'Événement'}</div>
+      <div class="item-sub">${timeFmt.format(d)}</div>
+    </div>`;
+  }).join('');
+})();
+
+// ── TASKS — Widgy JS bridge (fallback: open TickTick) ────────
+(function loadTasks() {
+  let tasks = [];
+  try {
+    tasks = window.widgetData?.tasks ?? window.tasks ?? [];
+  } catch {}
+
+  const list = document.getElementById('tasks-list');
+  if (!tasks.length) {
+    // No tasks exposed — invite user to open TickTick
+    list.innerHTML = `<div class="empty-msg">
+      <a href="ticktick://" style="color:#22c55e;text-decoration:none;font-size:12px;">
+        Voir mes tâches dans TickTick ↗
+      </a>
+    </div>`;
+    return;
+  }
+  list.innerHTML = tasks.slice(0, 6).map(t => `
+    <div class="list-item">
+      <div class="task-row">
+        <div class="task-circle"></div>
+        <div class="item-title">${t.title ?? t.name ?? 'Tâche'}</div>
+      </div>
+    </div>`
+  ).join('');
+})();
+
+// ── SPOTIFY / NOW PLAYING — Widgy JS bridge ──────────────────
+(function loadSpotify() {
+  let np = null;
+  try {
+    np = window.widgetData?.nowPlaying ?? window.nowPlaying ?? null;
+  } catch {}
+
+  if (np?.title) {
+    document.getElementById('sp-track').textContent  = np.title;
+    document.getElementById('sp-artist').textContent = np.artist ?? '';
+    document.getElementById('mini-track').textContent = np.title;
+  } else {
+    document.getElementById('sp-track').textContent  = 'Lance Spotify pour écouter';
+    document.getElementById('sp-artist').textContent = '';
+    document.getElementById('mini-track').textContent = '---';
+  }
+})();
+</script>
+</body>
+</html>
